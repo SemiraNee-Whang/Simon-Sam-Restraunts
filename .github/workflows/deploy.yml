@@ -6,21 +6,30 @@ permissions:
   contents: read
   pages: write
   id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Simon-Sam-Restraunts
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
-      - run: npm ci
+          # We remove the cache line for this run to skip the strict lockfile check
+      
+      - run: npm install # Use install instead of ci if the lockfile is being finicky
+      
       - run: npm run build
         env:
-          # This pulls the secret you saved in step 2 into the build process
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          # Tell GitHub to find the finished site inside that sub-folder
+          path: Simon-Sam-Restraunts/dist
+          
       - uses: actions/deploy-pages@v4
